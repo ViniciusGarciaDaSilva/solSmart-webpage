@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Painéis Solares</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar, .footer {
+            background-color: #1f1f1f;
+        }
+        .navbar-brand, .nav-link {
+            color: #e0e0e0 !important;
+        }
+        .navbar-brand:hover, .nav-link:hover {
+            color: #ffffff !important;
+        }
+        .jumbotron {
+            background-color: #2e2e2e;
+            color: #e0e0e0;
+            padding: 2rem 1rem;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .form-control, .btn, .form-inline .form-group, .form-inline .custom-select {
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 10px;
+        }
+        .form-control::placeholder {
+            color: #aaa;
+        }
+        .btn-primary {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+        }
+        .btn-primary:hover {
+            background-color: #155cb0;
+            border-color: #155cb0;
+        }
+        .footer {
+            padding: 1rem 0;
+            text-align: center;
+            width: 100%;
+            margin-top: auto;
+            border-top: 1px solid #444;
+        }
+        .container {
+            flex-grow: 1;
+        }
+        .result-item {
+            background-color: #2e2e2e;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="#">Calculadora Solar</a>
+        <a class="navbar-brand" href="index.html">Home</a>
+    </nav>
+
+    <div id="calculator" class="container">
+        <div class="jumbotron">
+            <h1 class="display-4">Calculadora de Painéis Solares</h1>
+            <p class="lead">Calcule a quantidade de painéis solares necessários com base no seu consumo mensal de energia e na potência dos painéis.</p>
+            <hr class="my-4">
+            <form class="form-inline">
+                <div class="form-group mb-2">
+                    <label for="consumo" class="sr-only">Consumo Mensal (kWh)</label>
+                    <input class="form-control" id="consumo" placeholder="Consumo Mensal (kWh)">
+                </div>
+                <div class="form-group mx-sm-3 mb-2">
+                    <label for="potenciaPainel" class="sr-only">Potência do Painel (W)</label>
+                    <select class="custom-select" id="potenciaPainel">
+                        <option value="0">Vazio</option>
+                        <option value="400">400W</option>
+                        <option value="450">450W</option>
+                        <option value="500">500W</option>
+                        <option value="550">550W</option>
+                        <option value="600">600W</option>
+                        <option value="650">650W</option>
+                        <option value="700">700W</option>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <label for="custoPotencia" class="sr-only">Potência Customizada (W)</label>
+                    <input class="form-control" id="custoPotencia" placeholder="Potência Customizada (W)" style="width: 235px;">
+                </div>
+                <div class="form-group mx-sm-3 mb-2">
+                    <label for="marcaPainel" class="sr-only">Marca do Painel</label>
+                    <input type="text" class="form-control" id="marcaPainel" placeholder="Marca do Painel">
+                </div>
+                <button type="button" class="btn btn-primary mb-2" onclick="calcular();">Calcular</button>
+            </form>
+            <div id="resultado" class="mt-3"></div>
+            <div id="historico" class="mt-3">
+                <h2>Histórico de Cálculos</h2>
+                <div id="historico-lista"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Calculadora Solar</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        let historico = [];
+        let editIndex = -1;
+
+        function calcular() {
+            const consumo = document.getElementById('consumo').value;
+            let potenciaPainel = document.getElementById('potenciaPainel').value;
+            const custoPotencia = document.getElementById('custoPotencia').value;
+            const marcaPainel = document.getElementById('marcaPainel').value;
+            const horasSolPorDia = 4.5; // média de horas de sol por dia
+            const diasNoMes = 30; // número de dias no mês
+            
+            if (!consumo) {
+                alert("Preencha todos os campos!!!");
+                return;
+            }
+
+            if (custoPotencia) {
+                potenciaPainel = custoPotencia;
+            }
+
+            const energiaDiaria = consumo / diasNoMes;
+            const energiaPorPainelPorDia = potenciaPainel * horasSolPorDia / 1000; // Convertendo para kWh
+
+            const quantidadePainel = Math.ceil(energiaDiaria / energiaPorPainelPorDia);
+
+            let resultadoTexto = `Quantidade de painéis necessários: ${quantidadePainel}`;
+            if (marcaPainel) {
+                resultadoTexto += ` | Marca do Painel: ${marcaPainel}`;
+            }
+
+            document.getElementById('resultado').innerText = resultadoTexto;
+            if (editIndex === -1) {
+                adicionarHistorico(consumo, potenciaPainel, marcaPainel, quantidadePainel);
+            } else {
+                atualizarHistoricoItem(consumo, potenciaPainel, marcaPainel, quantidadePainel, editIndex);
+            }
+            limparCampos();
+        }
+
+        function adicionarHistorico(consumo, potenciaPainel, marcaPainel, quantidadePainel) {
+            const item = {
+                consumo,
+                potenciaPainel,
+                marcaPainel,
+                quantidadePainel
+            };
+            historico.push(item);
+            atualizarHistorico();
+        }
+
+        function atualizarHistoricoItem(consumo, potenciaPainel, marcaPainel, quantidadePainel, index) {
+            historico[index] = { consumo, potenciaPainel, marcaPainel, quantidadePainel };
+            atualizarHistorico();
+            editIndex = -1;
+        }
+
+        function atualizarHistorico() {
+            const historicoLista = document.getElementById('historico-lista');
+            historicoLista.innerHTML = '';
+            historico.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `
+                    <p>Consumo: ${item.consumo} kWh | Potência do Painel: ${item.potenciaPainel}W | Marca: ${item.marcaPainel} | Quantidade de Painéis: ${item.quantidadePainel}</p>
+                    <button class="btn btn-secondary btn-sm" onclick="editarHistorico(${index})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deletarHistorico(${index})">Excluir</button>
+                `;
+                historicoLista.appendChild(div);
+            });
+        }
+
+        function editarHistorico(index) {
+            const item = historico[index];
+            document.getElementById('consumo').value = item.consumo;
+            document.getElementById('potenciaPainel').value = item.potenciaPainel;
+            document.getElementById('custoPotencia').value = item.potenciaPainel;
+            document.getElementById('marcaPainel').value = item.marcaPainel;
+            editIndex = index;
+        }
+
+        function deletarHistorico(index) {
+            historico.splice(index, 1);
+            atualizarHistorico();
+        }
+
+        function limparCampos() {
+            document.getElementById('consumo').value = '';
+            document.getElementById('potenciaPainel').value = '0';
+            document.getElementById('custoPotencia').value = '';
+            document.getElementById('marcaPainel').value = '';
+        }
+    </script>
+</body>
+</html>
